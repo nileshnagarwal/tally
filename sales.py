@@ -1,7 +1,7 @@
 import json as j
 import datetime
 
-with open("invoiceData_260621.json") as json_format_file: 
+with open("Bills.json") as json_format_file: 
   d = j.load(json_format_file)
 
 import xml.etree.cElementTree as e
@@ -26,7 +26,7 @@ svCurrentCompany = e.SubElement(staticVariables, "SVCURRENTCOMPANY").text = "Nim
 
 requestData = e.SubElement(importData, "REQUESTDATA")
 
-for obj in d["Export Bills"]:
+for obj in d["Bills"]:
     tallyMessage = e.SubElement(requestData, "TALLYMESSAGE", {"xmlns:UDF":"TallyUDF"})
     voucher = e.SubElement(tallyMessage, "VOUCHER", {"ACTION":"Create", "VCHTYPE":"Sales"})
     voucherTypeName = e.SubElement(voucher, "VOUCHERTYPENAME").text = "Sales"
@@ -42,14 +42,18 @@ for obj in d["Export Bills"]:
     voucherNumber = e.SubElement(voucher, "VOUCHERNUMBER").text = str(obj["Invoice No"])
     guid = e.SubElement(voucher, "GUID")
     alterID = e.SubElement(voucher, "ALTERID")
-    clientAmount = "-" + str(obj["Total Bill Amount"])
+    clientAmount = "-" + str(round(obj["Total Bill Amount"],2))
     if (obj["GST (Payable by Us)"]):
         arr = [1,2,3]
-        freightForwardingAmount = str(obj["Total Bill Amount"] - obj["GST (Payable by Us)"])
-        gstAmount = str(obj["GST (Payable by Us)"])
+        freightForwardingAmount = str(round(round(obj["Total Bill Amount"],2) - round(obj["GST (Payable by Us)"],2),2))
+        gstAmount = str(round(obj["GST (Payable by Us)"],2))
+        if (float(freightForwardingAmount) + float(gstAmount) != -float(clientAmount)):
+            raise Exception("Freight Mismatch Error ", obj["Invoice No"])
     else:
         arr = [1,2]
-        freightForwardingAmount = str(obj["Total Bill Amount"])
+        freightForwardingAmount = str(round(obj["Total Bill Amount"],2))
+        if (float(freightForwardingAmount) != -float(clientAmount)):
+            raise Exception("Freight Mismatch Error ", obj["Invoice No"])
     for n in arr:
         allLedgerEntries = e.SubElement(voucher, "ALLLEDGERENTRIES.LIST")
         removeZeroEntries = e.SubElement(allLedgerEntries, "REMOVEZEROENTRIES").text = "No"
