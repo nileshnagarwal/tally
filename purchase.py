@@ -1,7 +1,7 @@
 import json as j
 import datetime
 
-with open("data_260621.json") as json_format_file: 
+with open("Challans.json") as json_format_file: 
   d = j.load(json_format_file)
 
 import xml.etree.cElementTree as e
@@ -26,7 +26,7 @@ svCurrentCompany = e.SubElement(staticVariables, "SVCURRENTCOMPANY").text = "Nim
 
 requestData = e.SubElement(importData, "REQUESTDATA")
 
-for obj in d["Exp Challan"]:
+for obj in d["Challans"]:
     tallyMessage = e.SubElement(requestData, "TALLYMESSAGE", {"xmlns:UDF":"TallyUDF"})
     voucher = e.SubElement(tallyMessage, "VOUCHER", {"ACTION":"Create", "VCHTYPE":"Purchase"})
     voucherTypeName = e.SubElement(voucher, "VOUCHERTYPENAME").text = "Purchase"
@@ -61,7 +61,7 @@ for obj in d["Exp Challan"]:
 
 a = e.ElementTree(root)
 
-a.write("json_to_xml.xml")
+a.write("purchase.xml")
 
 def pretty_xml(element, indent, newline, level=0):  # Elemnt is passed in Elment class parameters for indentation indent, for wrapping NEWLINE
     if element:  # Determine whether the element has child elements    
@@ -81,4 +81,4 @@ def pretty_xml(element, indent, newline, level=0):  # Elemnt is passed in Elment
 
 pretty_xml(root, '\t', '\n')  # Beautification execution method
 a = e.ElementTree(root)
-a.write('json_to_xml_pretty.xml')
+a.write('purchase_pretty.xml')
